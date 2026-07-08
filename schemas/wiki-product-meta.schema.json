@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://llm-wiki.local/schemas/wiki-product-meta.schema.json",
+  "title": "llm-wiki product meta",
+  "type": "object",
+  "required": ["build_date", "wiki_title", "total_pages", "total_nodes", "total_edges", "data_files"],
+  "properties": {
+    "build_date": { "type": "string" },
+    "source_graph_build_date": { "type": "string" },
+    "wiki_title": { "type": "string" },
+    "total_pages": { "type": "integer", "minimum": 0 },
+    "total_nodes": { "type": "integer", "minimum": 0 },
+    "total_edges": { "type": "integer", "minimum": 0 },
+    "type_counts": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+    "project_counts": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+    "tag_counts": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+    "project_count": { "type": "integer", "minimum": 0 },
+    "topic_count": { "type": "integer", "minimum": 0 },
+    "recent_count": { "type": "integer", "minimum": 0 },
+    "content_count": { "type": "integer", "minimum": 0 },
+    "sensitive_hit_count": { "type": "integer", "minimum": 0 },
+    "sensitive_hit_ids": { "type": "array", "items": { "type": "string" } },
+    "data_files": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,1161 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>llm-wiki 知识工作台</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f4ee;
+      --surface: #fffefa;
+      --surface-2: #f0ebe2;
+      --ink: #24221e;
+      --muted: #6f675d;
+      --line: #d8d0c3;
+      --red: #9a3d31;
+      --green: #3f7565;
+      --blue: #315f78;
+      --amber: #a66f1d;
+      --violet: #6d5a88;
+      --shadow: 0 14px 34px rgba(36, 31, 26, .11);
+      --radius: 8px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      background:
+        linear-gradient(135deg, rgba(49, 95, 120, .08), transparent 34%),
+        linear-gradient(225deg, rgba(154, 61, 49, .08), transparent 30%),
+        var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      overflow: hidden;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      display: grid;
+      grid-template-rows: 64px minmax(0, 1fr);
+      height: 100%;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 18px;
+      background: rgba(255, 254, 250, .9);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+      z-index: 5;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 248px;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius);
+      background: var(--red);
+      color: #fffefa;
+      font-weight: 800;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .brand p {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .search {
+      flex: 1;
+      min-width: 220px;
+      height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .search:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(49, 95, 120, .14);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .tab,
+    .chip,
+    .mini-button {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .tab {
+      height: 38px;
+      padding: 0 12px;
+    }
+
+    .tab.active {
+      color: white;
+      border-color: var(--blue);
+      background: var(--blue);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 288px minmax(420px, 1fr) 380px;
+      min-height: 0;
+    }
+
+    .sidebar,
+    .detail-panel {
+      min-height: 0;
+      overflow: hidden;
+      background: rgba(255, 254, 250, .86);
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+    }
+
+    .detail-panel {
+      border-left: 1px solid var(--line);
+    }
+
+    .section {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .stat {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 21px;
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .chip {
+      padding: 6px 9px;
+      font-size: 12px;
+    }
+
+    .chip.active {
+      color: white;
+      border-color: var(--green);
+      background: var(--green);
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: minmax(240px, 48%) minmax(260px, 52%);
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .result-panel,
+    .graph-panel {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .result-panel {
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 254, 250, .54);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .result-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      height: 46px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 254, 250, .78);
+    }
+
+    .result-head h2 {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .mini-button {
+      height: 30px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+
+    .result-list {
+      min-height: 0;
+      overflow: auto;
+      padding: 10px;
+    }
+
+    .item {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 8px;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 254, 250, .9);
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .item:hover,
+    .item.active {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(49, 95, 120, .1);
+    }
+
+    .item strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.36;
+      overflow-wrap: anywhere;
+    }
+
+    .item p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .item small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+
+    .metric-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .metric {
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .link-list {
+      display: grid;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .inline-link {
+      width: 100%;
+      padding: 7px 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 254, 250, .78);
+      color: var(--ink);
+      text-align: left;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .graph-panel {
+      position: relative;
+      background:
+        linear-gradient(rgba(37, 35, 31, .045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37, 35, 31, .045) 1px, transparent 1px),
+        rgba(247, 244, 238, .84);
+      background-size: 34px 34px;
+    }
+
+    #graph {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .graph-tools {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .graph-note {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 254, 250, .92);
+      color: var(--muted);
+      font-size: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .node circle {
+      cursor: pointer;
+      stroke: rgba(255, 254, 250, .92);
+      stroke-width: 1.5;
+    }
+
+    .node.selected circle {
+      stroke: var(--red);
+      stroke-width: 3;
+    }
+
+    .node text {
+      pointer-events: none;
+      fill: var(--ink);
+      font-size: 11px;
+      paint-order: stroke;
+      stroke: rgba(255, 254, 250, .88);
+      stroke-linejoin: round;
+      stroke-width: 4px;
+    }
+
+    .edge {
+      stroke: rgba(73, 65, 56, .24);
+      stroke-width: 1;
+    }
+
+    .detail {
+      height: 100%;
+      overflow: auto;
+    }
+
+    .detail-head {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .detail-head h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .detail-body {
+      padding: 16px;
+      line-height: 1.68;
+      font-size: 14px;
+    }
+
+    .detail-body h1,
+    .detail-body h2,
+    .detail-body h3 {
+      line-height: 1.34;
+    }
+
+    .detail-body pre,
+    .detail-body code {
+      font-family: var(--mono);
+    }
+
+    .detail-body pre {
+      overflow: auto;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: #25231f;
+      color: #fffefa;
+    }
+
+    .detail-body blockquote {
+      margin: 12px 0;
+      padding: 8px 12px;
+      border-left: 3px solid var(--green);
+      background: rgba(63, 117, 101, .08);
+      color: var(--muted);
+    }
+
+    .detail-body table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .detail-body th,
+    .detail-body td {
+      border: 1px solid var(--line);
+      padding: 6px 8px;
+      vertical-align: top;
+    }
+
+    .empty {
+      padding: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 1120px) {
+      body {
+        overflow: auto;
+      }
+
+      .app {
+        height: auto;
+        min-height: 100%;
+      }
+
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+        height: auto;
+        padding: 12px;
+      }
+
+      .brand {
+        min-width: 0;
+      }
+
+      .tabs {
+        overflow: auto;
+        padding-bottom: 2px;
+        width: 100%;
+      }
+
+      .search {
+        width: 100%;
+      }
+
+      .result-head {
+        align-items: flex-start;
+        flex-direction: column;
+        height: auto;
+        min-height: 46px;
+        padding: 10px 14px;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar,
+      .detail-panel {
+        border-left: 0;
+        border-right: 0;
+      }
+
+      .main {
+        grid-template-rows: 420px 480px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">W</div>
+        <div>
+          <h1>llm-wiki 知识工作台</h1>
+          <p id="buildMeta">加载数据中</p>
+        </div>
+      </div>
+      <input id="searchInput" class="search" type="search" placeholder="搜索知识、项目、主题、正文">
+      <nav id="tabs" class="tabs" aria-label="视图">
+        <button class="tab active" type="button" data-view="all">全部</button>
+        <button class="tab" type="button" data-view="projects">项目</button>
+        <button class="tab" type="button" data-view="topics">主题</button>
+        <button class="tab" type="button" data-view="recent">最近</button>
+        <button class="tab" type="button" data-view="graph">图谱</button>
+      </nav>
+    </header>
+
+    <section class="workspace">
+      <aside class="sidebar">
+        <section class="section">
+          <div class="section-head">
+            <h2>数据状态</h2>
+            <span id="resultCount" class="meta">0 项</span>
+          </div>
+          <div class="stats">
+            <div class="stat"><strong id="pageCount">0</strong><span>页面</span></div>
+            <div class="stat"><strong id="edgeCount">0</strong><span>关系</span></div>
+            <div class="stat"><strong id="projectCount">0</strong><span>项目</span></div>
+            <div class="stat"><strong id="topicCount">0</strong><span>主题</span></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2>类型</h2>
+            <button id="clearFilters" class="mini-button" type="button">重置</button>
+          </div>
+          <div id="typeFilters" class="chips"></div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2>项目</h2>
+          </div>
+          <div id="projectFilters" class="chips"></div>
+        </section>
+      </aside>
+
+      <section class="main">
+        <section class="result-panel">
+          <div class="result-head">
+            <h2 id="viewTitle">全部知识</h2>
+            <span id="viewMeta" class="meta">准备就绪</span>
+          </div>
+          <div id="resultList" class="result-list"></div>
+        </section>
+
+        <section class="graph-panel">
+          <div class="graph-tools">
+            <button id="fitGraph" class="mini-button" type="button">居中</button>
+            <button id="graphTop" class="mini-button" type="button">核心</button>
+          </div>
+          <svg id="graph" role="img" aria-label="知识关系图谱"></svg>
+          <div class="graph-note">点击节点查看详情，搜索和筛选会同步影响图谱。</div>
+        </section>
+      </section>
+
+      <aside class="detail-panel">
+        <article id="detail" class="detail">
+          <div class="empty">选择一条知识查看详情。</div>
+        </article>
+      </aside>
+    </section>
+  </main>
+
+  <script src="assets/d3.min.js"></script>
+  <script src="assets/marked.min.js"></script>
+  <script src="assets/purify.min.js"></script>
+  <script>
+    const colors = new Map([
+      ["entity", "#9a3d31"],
+      ["topic", "#3f7565"],
+      ["source", "#315f78"],
+      ["synthesis", "#6d5a88"],
+      ["comparison", "#a66f1d"],
+      ["query", "#6f675d"],
+      ["project", "#2f6f7d"]
+    ]);
+
+    const labels = {
+      entity: "实体",
+      topic: "主题",
+      source: "来源",
+      synthesis: "综合",
+      comparison: "对比",
+      query: "检查",
+      project: "项目"
+    };
+
+    const state = {
+      meta: null,
+      search: [],
+      graph: { nodes: [], edges: [] },
+      projects: [],
+      topics: [],
+      recent: [],
+      contentCache: new Map(),
+      activeView: "all",
+      query: "",
+      type: "all",
+      project: "all",
+      selectedId: "",
+      simulation: null,
+      showCoreOnly: false
+    };
+
+    const els = {
+      buildMeta: document.getElementById("buildMeta"),
+      searchInput: document.getElementById("searchInput"),
+      tabs: document.getElementById("tabs"),
+      pageCount: document.getElementById("pageCount"),
+      edgeCount: document.getElementById("edgeCount"),
+      projectCount: document.getElementById("projectCount"),
+      topicCount: document.getElementById("topicCount"),
+      resultCount: document.getElementById("resultCount"),
+      typeFilters: document.getElementById("typeFilters"),
+      projectFilters: document.getElementById("projectFilters"),
+      clearFilters: document.getElementById("clearFilters"),
+      viewTitle: document.getElementById("viewTitle"),
+      viewMeta: document.getElementById("viewMeta"),
+      resultList: document.getElementById("resultList"),
+      detail: document.getElementById("detail"),
+      graph: d3.select("#graph"),
+      fitGraph: document.getElementById("fitGraph"),
+      graphTop: document.getElementById("graphTop")
+    };
+
+    function normalize(value) {
+      return String(value || "").toLowerCase();
+    }
+
+    function labelForType(type) {
+      return labels[type] || type || "其他";
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function renderMarkdown(markdown) {
+      if (window.marked && window.DOMPurify) {
+        return DOMPurify.sanitize(marked.parse(markdown || ""));
+      }
+      return `<p>${escapeHtml(markdown || "")}</p>`;
+    }
+
+    function sortByRecent(items) {
+      return [...items].sort((a, b) => itemDate(b).localeCompare(itemDate(a)));
+    }
+
+    function itemDate(item) {
+      return String(item && (item.updated || item.created || item.modified || item.latest) || "");
+    }
+
+    function itemById(id) {
+      return state.search.find((entry) => entry.id === id);
+    }
+
+    async function loadJson(path) {
+      const response = await fetch(path, { cache: "no-store" });
+      if (!response.ok) throw new Error(`${path} ${response.status}`);
+      return response.json();
+    }
+
+    async function init() {
+      const [meta, graph, search, projects, topics, recent] = await Promise.all([
+        loadJson("data/meta.json"),
+        loadJson("data/graph-data.json"),
+        loadJson("data/search-index.json"),
+        loadJson("data/project-index.json"),
+        loadJson("data/topic-index.json"),
+        loadJson("data/recent-index.json")
+      ]);
+
+      state.meta = meta;
+      state.graph = graph;
+      state.search = search.items || [];
+      state.projects = projects.projects || [];
+      state.topics = topics.topics || [];
+      state.recent = recent.items || [];
+
+      els.buildMeta.textContent = `${meta.total_pages} 页 · ${meta.total_edges} 条关系 · ${meta.build_date}`;
+      els.pageCount.textContent = meta.total_pages;
+      els.edgeCount.textContent = meta.total_edges;
+      els.projectCount.textContent = meta.project_count;
+      els.topicCount.textContent = meta.topic_count;
+
+      buildTypeFilters();
+      buildProjectFilters();
+      render();
+      const first = state.search.find((item) => item.type === "topic") || state.search[0];
+      if (first) selectItem(first.id);
+    }
+
+    function buildTypeFilters() {
+      els.typeFilters.innerHTML = "";
+      const counts = state.meta.type_counts || {};
+      addChip(els.typeFilters, "all", `全部 ${state.meta.total_pages}`, state.type === "all", (value) => {
+        state.type = value;
+        render();
+      });
+      for (const [type, count] of Object.entries(counts)) {
+        addChip(els.typeFilters, type, `${labelForType(type)} ${count}`, state.type === type, (value) => {
+          state.type = value;
+          render();
+        });
+      }
+    }
+
+    function buildProjectFilters() {
+      els.projectFilters.innerHTML = "";
+      addChip(els.projectFilters, "all", "全部项目", state.project === "all", (value) => {
+        state.project = value;
+        render();
+      });
+      for (const project of state.projects) {
+        addChip(els.projectFilters, project.project_id, project.title, state.project === project.project_id, (value) => {
+          state.project = value;
+          state.activeView = "projects";
+          setActiveTab();
+          render();
+        });
+      }
+    }
+
+    function addChip(container, value, text, active, onClick) {
+      const button = document.createElement("button");
+      button.className = `chip${active ? " active" : ""}`;
+      button.type = "button";
+      button.textContent = text;
+      button.addEventListener("click", () => onClick(value));
+      container.appendChild(button);
+    }
+
+    function filteredSearch() {
+      const query = normalize(state.query);
+      return state.search.filter((item) => {
+        const queryMatch = !query || normalize(item.search_text).includes(query);
+        const typeMatch = state.type === "all" || item.type === state.type;
+        const projectMatch = state.project === "all" || item.project === state.project;
+        return queryMatch && typeMatch && projectMatch;
+      });
+    }
+
+    function currentItems() {
+      const base = filteredSearch();
+      if (state.activeView === "projects") {
+        const ids = new Set(state.projects.map((item) => item.id));
+        return base.filter((item) => ids.has(item.id) || (state.project !== "all" && item.project === state.project));
+      }
+      if (state.activeView === "topics") {
+        const ids = new Set(state.topics.map((item) => item.id));
+        return base.filter((item) => ids.has(item.id) || item.type === "topic");
+      }
+      if (state.activeView === "recent") {
+        const allowed = new Map(base.map((item) => [item.id, item]));
+        return state.recent.map((item) => allowed.get(item.id)).filter(Boolean);
+      }
+      return sortByRecent(base);
+    }
+
+    function render() {
+      buildTypeFilters();
+      buildProjectFilters();
+      renderResults();
+      renderGraph();
+    }
+
+    function renderResults() {
+      const items = currentItems();
+      els.resultCount.textContent = `${items.length} 项`;
+      const titles = {
+        all: "全部知识",
+        projects: "项目视图",
+        topics: "主题视图",
+        recent: "最近更新",
+        graph: "图谱视图"
+      };
+      els.viewTitle.textContent = titles[state.activeView] || "全部知识";
+      els.viewMeta.textContent = `${state.type === "all" ? "全部类型" : labelForType(state.type)} · ${state.project === "all" ? "全部项目" : state.project}`;
+      els.resultList.innerHTML = "";
+
+      if (state.activeView === "projects" && !state.query && state.type === "all") {
+        renderProjectCards(items);
+        return;
+      }
+
+      if (state.activeView === "topics" && !state.query && state.type === "all" && state.project === "all") {
+        renderTopicCards();
+        return;
+      }
+
+      if (!items.length) {
+        els.resultList.innerHTML = '<div class="empty">没有匹配结果。</div>';
+        return;
+      }
+
+      const visible = state.activeView === "graph"
+        ? [...items].sort((a, b) => b.degree - a.degree).slice(0, 80)
+        : items.slice(0, 140);
+
+      for (const item of visible) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `item${state.selectedId === item.id ? " active" : ""}`;
+        button.innerHTML = `
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.summary || "暂无摘要")}</p>
+          <small>${labelForType(item.type)} · ${escapeHtml(item.project || item.community || "未分组")} · ${escapeHtml(itemDate(item))}</small>
+        `;
+        button.addEventListener("click", () => selectItem(item.id));
+        els.resultList.appendChild(button);
+      }
+    }
+
+    function renderProjectCards(items) {
+      const visibleProjects = state.project === "all"
+        ? state.projects
+        : state.projects.filter((project) => project.project_id === state.project);
+      for (const project of visibleProjects) {
+        const card = document.createElement("div");
+        card.tabIndex = 0;
+        card.className = `item${state.selectedId === project.id ? " active" : ""}`;
+        card.innerHTML = `
+          <strong>${escapeHtml(project.title)}</strong>
+          <p>${escapeHtml(project.summary || "暂无摘要")}</p>
+          <div class="metric-row">
+            <span class="metric">${project.doc_count} 篇资料</span>
+            <span class="metric">${project.session_count} 条会话</span>
+            <span class="metric">最近 ${escapeHtml(project.latest || "")}</span>
+          </div>
+          ${renderInlineLinks(project.top_docs || [])}
+        `;
+        card.addEventListener("click", (event) => selectFromCard(event, project.id));
+        card.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") selectItem(project.id);
+        });
+        els.resultList.appendChild(card);
+      }
+    }
+
+    function renderTopicCards() {
+      for (const topic of state.topics) {
+        const card = document.createElement("div");
+        card.tabIndex = 0;
+        card.className = `item${state.selectedId === topic.id ? " active" : ""}`;
+        card.innerHTML = `
+          <strong>${escapeHtml(topic.title)}</strong>
+          <p>${escapeHtml(topic.summary || "暂无摘要")}</p>
+          <div class="metric-row">
+            <span class="metric">${topic.related_count} 条关联</span>
+            ${(topic.tags || []).slice(0, 4).map((tag) => `<span class="metric">${escapeHtml(tag)}</span>`).join("")}
+          </div>
+          ${renderInlineLinks(topic.top_related || [])}
+        `;
+        card.addEventListener("click", (event) => selectFromCard(event, topic.id));
+        card.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") selectItem(topic.id);
+        });
+        els.resultList.appendChild(card);
+      }
+    }
+
+    function renderInlineLinks(items, allowedIds = null) {
+      const links = items
+        .filter((item) => !allowedIds || allowedIds.has(item.id))
+        .slice(0, 5)
+        .map((item) => `
+          <button class="inline-link" type="button" data-select-id="${escapeHtml(item.id)}">
+            ${escapeHtml(item.title)} · ${labelForType(item.type)} · ${escapeHtml(itemDate(item))}
+          </button>
+        `)
+        .join("");
+      return links ? `<div class="link-list">${links}</div>` : "";
+    }
+
+    function selectFromCard(event, fallbackId) {
+      const link = event.target.closest("[data-select-id]");
+      selectItem(link ? link.dataset.selectId : fallbackId);
+    }
+
+    function selectItem(id) {
+      state.selectedId = id;
+      const item = itemById(id);
+      renderResults();
+      renderDetail(item);
+      renderGraph();
+    }
+
+    async function loadContent(item) {
+      if (!item || !item.content_path) return "";
+      if (state.contentCache.has(item.id)) return state.contentCache.get(item.id);
+      const data = await loadJson(item.content_path);
+      state.contentCache.set(item.id, data.content || "");
+      return data.content || "";
+    }
+
+    async function renderDetail(item) {
+      if (!item) {
+        els.detail.innerHTML = '<div class="empty">选择一条知识查看详情。</div>';
+        return;
+      }
+      const tagValues = [
+        labelForType(item.type),
+        item.project || item.community,
+        item.updated || item.created,
+        ...item.tags.slice(0, 8),
+        ...item.aliases.slice(0, 4)
+      ].filter(Boolean);
+
+      els.detail.innerHTML = `
+        <div class="detail-head">
+          <h2>${escapeHtml(item.title)}</h2>
+          <div class="tags">${tagValues.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
+        </div>
+        <div class="detail-body">正在读取正文...</div>
+      `;
+      try {
+        const content = await loadContent(item);
+        if (state.selectedId !== item.id) return;
+        const body = els.detail.querySelector(".detail-body");
+        body.innerHTML = renderMarkdown(content || item.summary || "");
+      } catch (error) {
+        if (state.selectedId !== item.id) return;
+        const body = els.detail.querySelector(".detail-body");
+        body.innerHTML = `<p>${escapeHtml(error.message)}</p>`;
+      }
+    }
+
+    function graphItems() {
+      const ids = new Set(currentItems().map((item) => item.id));
+      let nodes = state.graph.nodes.filter((node) => ids.has(node.id));
+      if (state.showCoreOnly || state.activeView === "graph") {
+        nodes = nodes.sort((a, b) => b.degree - a.degree).slice(0, 90);
+      } else {
+        nodes = nodes.sort((a, b) => b.degree - a.degree).slice(0, 120);
+      }
+      const nodeIds = new Set(nodes.map((node) => node.id));
+      const edges = state.graph.edges
+        .filter((edge) => nodeIds.has(edge.from) && nodeIds.has(edge.to))
+        .map((edge) => ({
+          ...edge,
+          source: edge.from,
+          target: edge.to
+        }));
+      return { nodes: nodes.map((node) => ({ ...node })), edges };
+    }
+
+    function renderGraph() {
+      const svg = els.graph;
+      const element = svg.node();
+      const width = element.clientWidth || 800;
+      const height = element.clientHeight || 420;
+      svg.attr("viewBox", `0 0 ${width} ${height}`);
+      svg.selectAll("*").remove();
+      if (state.simulation) state.simulation.stop();
+
+      const { nodes, edges } = graphItems();
+      if (!nodes.length) {
+        svg.append("text")
+          .attr("x", width / 2)
+          .attr("y", height / 2)
+          .attr("text-anchor", "middle")
+          .attr("fill", "#6f675d")
+          .text("没有可显示的节点");
+        return;
+      }
+
+      const layer = svg.append("g");
+      svg.call(d3.zoom().scaleExtent([0.35, 4]).on("zoom", (event) => layer.attr("transform", event.transform)));
+
+      const link = layer.append("g")
+        .selectAll("line")
+        .data(edges)
+        .join("line")
+        .attr("class", "edge");
+
+      const node = layer.append("g")
+        .selectAll("g")
+        .data(nodes)
+        .join("g")
+        .attr("class", (d) => `node${d.id === state.selectedId ? " selected" : ""}`)
+        .call(d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended));
+
+      node.append("circle")
+        .attr("r", (d) => Math.max(6, Math.min(16, 6 + d.degree * .72)))
+        .attr("fill", (d) => colors.get(d.type) || "#6f675d")
+        .on("click", (event, d) => {
+          event.stopPropagation();
+          selectItem(d.id);
+        });
+
+      node.append("text")
+        .attr("x", 11)
+        .attr("y", 4)
+        .text((d) => d.title.length > 18 ? `${d.title.slice(0, 18)}...` : d.title);
+
+      state.simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(edges).id((d) => d.id).distance(88).strength(.38))
+        .force("charge", d3.forceManyBody().strength(-230))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("collision", d3.forceCollide().radius((d) => Math.max(26, 20 + d.degree)))
+        .on("tick", () => {
+          link
+            .attr("x1", (d) => d.source.x)
+            .attr("y1", (d) => d.source.y)
+            .attr("x2", (d) => d.target.x)
+            .attr("y2", (d) => d.target.y);
+          node.attr("transform", (d) => `translate(${d.x},${d.y})`);
+        });
+
+      function dragstarted(event, d) {
+        if (!event.active) state.simulation.alphaTarget(.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+      function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+      }
+      function dragended(event, d) {
+        if (!event.active) state.simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+      }
+    }
+
+    function setActiveTab() {
+      for (const tab of els.tabs.querySelectorAll(".tab")) {
+        tab.classList.toggle("active", tab.dataset.view === state.activeView);
+      }
+    }
+
+    els.searchInput.addEventListener("input", (event) => {
+      state.query = event.target.value;
+      render();
+    });
+
+    els.tabs.addEventListener("click", (event) => {
+      const tab = event.target.closest("[data-view]");
+      if (!tab) return;
+      state.activeView = tab.dataset.view;
+      setActiveTab();
+      render();
+    });
+
+    els.clearFilters.addEventListener("click", () => {
+      state.type = "all";
+      state.project = "all";
+      state.query = "";
+      els.searchInput.value = "";
+      render();
+    });
+
+    els.graphTop.addEventListener("click", () => {
+      state.showCoreOnly = !state.showCoreOnly;
+      els.graphTop.textContent = state.showCoreOnly ? "全部" : "核心";
+      renderGraph();
+    });
+
+    els.fitGraph.addEventListener("click", () => renderGraph());
+
+    window.addEventListener("resize", () => {
+      clearTimeout(window.__wikiResize);
+      window.__wikiResize = setTimeout(renderGraph, 160);
+    });
+
+    init().catch((error) => {
+      els.buildMeta.textContent = "未加载本地数据";
+      els.resultList.innerHTML = `
+        <div class="empty">
+          这个公开仓库只包含功能架构，不包含知识库数据。<br>
+          在本机运行 <code>python tools/build-wiki-product.py --wiki-dir D:\\path\\to\\private\\wiki</code> 后再刷新页面。<br>
+          ${escapeHtml(error.message)}
+        </div>
+      `;
+      els.detail.innerHTML = '<div class="empty">生成的 public/data/ 会留在本机，并被 Git 忽略。</div>';
+    });
+  </script>
+</body>
+</html>

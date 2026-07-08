@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://llm-wiki.local/schemas/wiki-product-content.schema.json",
+  "title": "llm-wiki page content",
+  "type": "object",
+  "required": ["id", "title", "type", "source_path", "content"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "type": { "type": "string" },
+    "project": { "type": "string" },
+    "source_path": { "type": "string" },
+    "created": { "type": "string" },
+    "updated": { "type": "string" },
+    "modified": { "type": "string" },
+    "content": { "type": "string" }
+  },
+  "additionalProperties": false
+}

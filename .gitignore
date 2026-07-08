@@ -1,0 +1,36 @@
+# Private knowledge sources and generated data
+wiki/
+public/data/
+raw/
+runtime/
+.ai-link/
+
+# Local environment and secrets
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+auth-state.json
+login-state.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node and caches
+node_modules/
+.cache/
+tmp/
+temp/
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

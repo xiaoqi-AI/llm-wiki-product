@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://llm-wiki.local/schemas/wiki-product-search.schema.json",
+  "title": "llm-wiki search index",
+  "type": "object",
+  "required": ["meta", "items"],
+  "properties": {
+    "meta": { "$ref": "wiki-product-meta.schema.json" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "type", "source_path", "summary", "content_path", "search_text"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "title": { "type": "string" },
+          "type": { "type": "string" },
+          "community": { "type": "string" },
+          "project": { "type": "string" },
+          "source_path": { "type": "string" },
+          "aliases": { "type": "array", "items": { "type": "string" } },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "created": { "type": "string" },
+          "updated": { "type": "string" },
+          "modified": { "type": "string" },
+          "sources": { "type": ["array", "string"] },
+          "summary": { "type": "string" },
+          "headings": { "type": "array", "items": { "type": "string" } },
+          "wiki_links": { "type": "array", "items": { "type": "string" } },
+          "content_path": { "type": "string", "pattern": "^data/content/.+\\.json$" },
+          "word_count": { "type": "integer", "minimum": 0 },
+          "degree": { "type": "integer", "minimum": 0 },
+          "sensitive_hits": { "type": "array", "items": { "type": "string" } },
+          "search_text": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}
