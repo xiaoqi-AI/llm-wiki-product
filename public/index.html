@@ -20,6 +20,8 @@
       --violet: #6d5a88;
       --shadow: 0 14px 34px rgba(36, 31, 26, .11);
       --radius: 8px;
+      --left-width: 288px;
+      --right-width: 380px;
       --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
       --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
     }
@@ -145,7 +147,7 @@
 
     .workspace {
       display: grid;
-      grid-template-columns: 288px minmax(420px, 1fr) 380px;
+      grid-template-columns: var(--left-width) 8px minmax(420px, 1fr) 8px var(--right-width);
       min-height: 0;
     }
 
@@ -162,6 +164,31 @@
 
     .detail-panel {
       border-left: 1px solid var(--line);
+    }
+
+    .resize-handle {
+      position: relative;
+      min-width: 8px;
+      background: rgba(216, 208, 195, .42);
+      cursor: col-resize;
+      touch-action: none;
+    }
+
+    .resize-handle::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 2px;
+      height: 44px;
+      border-radius: 999px;
+      background: rgba(111, 103, 93, .34);
+      transform: translate(-50%, -50%);
+    }
+
+    .resize-handle:hover,
+    .resize-handle.active {
+      background: rgba(49, 95, 120, .14);
     }
 
     .section {
@@ -496,6 +523,213 @@
       vertical-align: top;
     }
 
+    .detail-body img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      cursor: zoom-in;
+    }
+
+    .media-frame {
+      position: relative;
+      margin: 14px 0;
+    }
+
+    .media-frame .media-action,
+    .code-tools,
+    .viz-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .media-frame .media-action {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      opacity: 0;
+      transition: opacity .16s ease;
+    }
+
+    .media-frame:hover .media-action {
+      opacity: 1;
+    }
+
+    .code-block {
+      margin: 14px 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #25231f;
+      overflow: hidden;
+    }
+
+    .code-tools {
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255, 254, 250, .14);
+      background: rgba(255, 254, 250, .06);
+      color: rgba(255, 254, 250, .78);
+      font-size: 12px;
+    }
+
+    .code-tools .mini-button,
+    .viewer-actions .mini-button,
+    .viz-actions .mini-button,
+    .media-frame .mini-button {
+      background: rgba(255, 254, 250, .94);
+    }
+
+    .code-block pre {
+      margin: 0;
+      border-radius: 0;
+      border: 0;
+      max-height: 360px;
+    }
+
+    .doc-map,
+    .viz-card {
+      margin: 14px 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 254, 250, .82);
+    }
+
+    .doc-map-head,
+    .viz-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .doc-map-title,
+    .viz-title {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .doc-map-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+    }
+
+    .doc-node {
+      display: block;
+      min-height: 44px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+
+    .doc-node small {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .flow-svg {
+      display: block;
+      width: 100%;
+      min-height: 220px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(rgba(37, 35, 31, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37, 35, 31, .035) 1px, transparent 1px),
+        #fffefa;
+      background-size: 28px 28px;
+    }
+
+    .viz-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .viz-table th,
+    .viz-table td {
+      border: 1px solid var(--line);
+      padding: 6px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .viewer-modal[hidden] {
+      display: none;
+    }
+
+    .viewer-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(22, 20, 17, .58);
+    }
+
+    .viewer-shell {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      width: min(1120px, 94vw);
+      max-height: 90vh;
+      border: 1px solid rgba(255, 254, 250, .46);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 28px 70px rgba(0, 0, 0, .28);
+      overflow: hidden;
+    }
+
+    .viewer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 254, 250, .94);
+    }
+
+    .viewer-head strong {
+      overflow-wrap: anywhere;
+    }
+
+    .viewer-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .viewer-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 14px;
+    }
+
+    .viewer-body img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    .viewer-body pre {
+      margin: 0;
+      min-height: 60vh;
+      white-space: pre-wrap;
+      overflow: auto;
+    }
+
     .empty {
       padding: 18px;
       color: var(--muted);
@@ -543,6 +777,10 @@
 
       .workspace {
         grid-template-columns: 1fr;
+      }
+
+      .resize-handle {
+        display: none;
       }
 
       .sidebar,
@@ -608,6 +846,8 @@
         </section>
       </aside>
 
+      <div class="resize-handle left-handle" data-resize="left" title="拖动调整左侧栏宽度"></div>
+
       <section class="main">
         <section class="result-panel">
           <div class="result-head">
@@ -627,6 +867,8 @@
         </section>
       </section>
 
+      <div class="resize-handle right-handle" data-resize="right" title="拖动调整右侧栏宽度"></div>
+
       <aside class="detail-panel">
         <article id="detail" class="detail">
           <div class="empty">选择一条知识查看详情。</div>
@@ -634,6 +876,19 @@
       </aside>
     </section>
   </main>
+
+  <div id="viewerModal" class="viewer-modal" hidden>
+    <div class="viewer-shell" role="dialog" aria-modal="true" aria-labelledby="viewerTitle">
+      <div class="viewer-head">
+        <strong id="viewerTitle">预览</strong>
+        <div class="viewer-actions">
+          <button id="viewerCopy" class="mini-button" type="button">复制</button>
+          <button id="viewerClose" class="mini-button" type="button">关闭</button>
+        </div>
+      </div>
+      <div id="viewerBody" class="viewer-body"></div>
+    </div>
+  </div>
 
   <script src="assets/d3.min.js"></script>
   <script src="assets/marked.min.js"></script>
@@ -673,7 +928,12 @@
       project: "all",
       selectedId: "",
       simulation: null,
-      showCoreOnly: false
+      showCoreOnly: false,
+      layout: {
+        leftWidth: 288,
+        rightWidth: 380
+      },
+      viewerText: ""
     };
 
     const els = {
@@ -694,7 +954,13 @@
       detail: document.getElementById("detail"),
       graph: d3.select("#graph"),
       fitGraph: document.getElementById("fitGraph"),
-      graphTop: document.getElementById("graphTop")
+      graphTop: document.getElementById("graphTop"),
+      resizeHandles: document.querySelectorAll("[data-resize]"),
+      viewerModal: document.getElementById("viewerModal"),
+      viewerTitle: document.getElementById("viewerTitle"),
+      viewerBody: document.getElementById("viewerBody"),
+      viewerCopy: document.getElementById("viewerCopy"),
+      viewerClose: document.getElementById("viewerClose")
     };
 
     function normalize(value) {
@@ -721,6 +987,425 @@
       return `<p>${escapeHtml(markdown || "")}</p>`;
     }
 
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function setupLayout() {
+      const storedLeft = Number(localStorage.getItem("llmWikiLeftWidth"));
+      const storedRight = Number(localStorage.getItem("llmWikiRightWidth"));
+      if (Number.isFinite(storedLeft) && storedLeft > 0) state.layout.leftWidth = storedLeft;
+      if (Number.isFinite(storedRight) && storedRight > 0) state.layout.rightWidth = storedRight;
+      applyLayout(false);
+
+      for (const handle of els.resizeHandles) {
+        handle.addEventListener("pointerdown", (event) => startResize(event, handle.dataset.resize, handle));
+        handle.addEventListener("dblclick", () => {
+          state.layout.leftWidth = 288;
+          state.layout.rightWidth = 380;
+          applyLayout();
+        });
+      }
+    }
+
+    function startResize(event, side, handle) {
+      if (window.innerWidth <= 1120) return;
+      event.preventDefault();
+      handle.classList.add("active");
+      handle.setPointerCapture(event.pointerId);
+      const startX = event.clientX;
+      const startLeft = state.layout.leftWidth;
+      const startRight = state.layout.rightWidth;
+      const maxSide = Math.max(260, Math.min(720, window.innerWidth - 680));
+
+      function move(pointerEvent) {
+        if (side === "left") {
+          state.layout.leftWidth = clamp(startLeft + pointerEvent.clientX - startX, 220, maxSide);
+        } else {
+          state.layout.rightWidth = clamp(startRight + startX - pointerEvent.clientX, 300, maxSide);
+        }
+        applyLayout();
+      }
+
+      function end(pointerEvent) {
+        handle.classList.remove("active");
+        handle.releasePointerCapture(pointerEvent.pointerId);
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", end);
+      }
+
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", end, { once: true });
+    }
+
+    function applyLayout(store = true) {
+      document.documentElement.style.setProperty("--left-width", `${state.layout.leftWidth}px`);
+      document.documentElement.style.setProperty("--right-width", `${state.layout.rightWidth}px`);
+      if (store) {
+        localStorage.setItem("llmWikiLeftWidth", String(state.layout.leftWidth));
+        localStorage.setItem("llmWikiRightWidth", String(state.layout.rightWidth));
+      }
+      if (state.meta) requestAnimationFrame(renderGraph);
+    }
+
+    function openViewer({ title, node, text = "", copy = true }) {
+      els.viewerTitle.textContent = title || "预览";
+      els.viewerBody.replaceChildren();
+      if (node) els.viewerBody.appendChild(node);
+      state.viewerText = text || "";
+      els.viewerCopy.hidden = !copy || !state.viewerText;
+      els.viewerModal.hidden = false;
+    }
+
+    function closeViewer() {
+      els.viewerModal.hidden = true;
+      els.viewerBody.replaceChildren();
+      state.viewerText = "";
+    }
+
+    function openImageViewer(img) {
+      const full = new Image();
+      full.src = img.currentSrc || img.src;
+      full.alt = img.alt || "";
+      openViewer({ title: img.alt || "图片预览", node: full, copy: false });
+    }
+
+    function openCodeViewer(source, language) {
+      const pre = document.createElement("pre");
+      const code = document.createElement("code");
+      code.textContent = source || "";
+      pre.appendChild(code);
+      openViewer({ title: `${language || "text"} 代码`, node: pre, text: source || "" });
+    }
+
+    function enhanceDetailBody(body, item) {
+      renderDocumentMap(body);
+      enhanceImages(body, item);
+      enhanceCodeBlocks(body);
+    }
+
+    function renderDocumentMap(body) {
+      const headings = [...body.querySelectorAll("h1, h2, h3, h4")]
+        .filter((heading) => heading.textContent.trim());
+      if (headings.length < 2) return;
+
+      const map = document.createElement("section");
+      map.className = "doc-map";
+      const head = document.createElement("div");
+      head.className = "doc-map-head";
+      head.innerHTML = `<p class="doc-map-title">文档结构</p><span class="meta">${headings.length} 个节点</span>`;
+      const grid = document.createElement("div");
+      grid.className = "doc-map-grid";
+
+      headings.slice(0, 18).forEach((heading, index) => {
+        if (!heading.id) heading.id = `doc-section-${index + 1}`;
+        const node = document.createElement("a");
+        node.className = "doc-node";
+        node.href = `#${heading.id}`;
+        node.innerHTML = `<small>${heading.tagName}</small>${escapeHtml(heading.textContent.trim())}`;
+        grid.appendChild(node);
+      });
+
+      map.append(head, grid);
+      body.prepend(map);
+    }
+
+    function enhanceImages(body, item) {
+      for (const img of [...body.querySelectorAll("img")]) {
+        if (img.closest(".media-frame")) continue;
+        const frame = document.createElement("figure");
+        frame.className = "media-frame";
+        img.parentNode.insertBefore(frame, img);
+        frame.appendChild(img);
+
+        const actions = document.createElement("div");
+        actions.className = "media-action";
+        const button = makeMiniButton("放大");
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openImageViewer(img);
+        });
+        actions.appendChild(button);
+        frame.appendChild(actions);
+
+        img.title = "点击放大";
+        img.addEventListener("click", () => openImageViewer(img));
+        img.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") openImageViewer(img);
+        });
+        img.tabIndex = 0;
+        if (!img.alt && item) img.alt = item.title;
+      }
+    }
+
+    function enhanceCodeBlocks(body) {
+      const blocks = [...body.querySelectorAll("pre > code")];
+      for (const code of blocks) {
+        const pre = code.parentElement;
+        if (!pre || pre.closest(".code-block")) continue;
+        const source = code.textContent || "";
+        const language = codeLanguage(code);
+
+        if (isFlowSource(language, source)) {
+          const card = createFlowCard(source);
+          pre.parentNode.insertBefore(card, pre);
+        }
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "code-block";
+        const tools = document.createElement("div");
+        tools.className = "code-tools";
+        const label = document.createElement("span");
+        label.textContent = language || "text";
+        const actions = document.createElement("div");
+        actions.className = "viz-actions";
+        const expand = makeMiniButton("放大");
+        const copy = makeMiniButton("复制");
+        expand.addEventListener("click", () => openCodeViewer(source, language));
+        copy.addEventListener("click", () => copyText(source, copy));
+        actions.append(expand, copy);
+        tools.append(label, actions);
+        pre.parentNode.insertBefore(wrapper, pre);
+        wrapper.append(tools, pre);
+      }
+    }
+
+    function makeMiniButton(text) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "mini-button";
+      button.textContent = text;
+      return button;
+    }
+
+    function codeLanguage(code) {
+      const match = String(code.className || "").match(/language-([\w-]+)/);
+      return match ? match[1].toLowerCase() : "";
+    }
+
+    function isFlowSource(language, source) {
+      if (/^(mermaid|flow|flowchart|dot|graphviz)$/.test(language || "")) return true;
+      return /\b(flowchart|graph|digraph|mindmap)\b/i.test(source || "") && /(-->|---|==>|->|=>)/.test(source || "");
+    }
+
+    function createFlowCard(source) {
+      const card = document.createElement("section");
+      card.className = "viz-card";
+      const head = document.createElement("div");
+      head.className = "viz-head";
+      const title = document.createElement("p");
+      title.className = "viz-title";
+      title.textContent = "流程图可视化";
+      const actions = document.createElement("div");
+      actions.className = "viz-actions";
+      const expand = makeMiniButton("放大");
+      expand.addEventListener("click", () => {
+        openViewer({
+          title: "流程图可视化",
+          node: renderFlowSvg(source, true),
+          text: source || ""
+        });
+      });
+      actions.appendChild(expand);
+      head.append(title, actions);
+      card.append(head, renderFlowSvg(source, false));
+      return card;
+    }
+
+    function parseFlow(source) {
+      const nodes = new Map();
+      const edges = [];
+      const addNode = (token) => {
+        const clean = cleanFlowToken(token);
+        if (!clean.id) return null;
+        if (!nodes.has(clean.id)) nodes.set(clean.id, clean);
+        return nodes.get(clean.id);
+      };
+
+      for (const rawLine of String(source || "").split(/\r?\n/)) {
+        let line = rawLine.trim();
+        if (!line || line.startsWith("%%") || line.startsWith("#")) continue;
+        if (/^(flowchart|graph|sequenceDiagram|stateDiagram|classDiagram|mindmap)\b/i.test(line)) continue;
+        line = line.replace(/\|[^|]+\|/g, " ");
+        const parts = line.split(/\s*(?:-->|---|==>|->|=>)\s*/).map((part) => part.trim()).filter(Boolean);
+        if (parts.length < 2) continue;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const from = addNode(parts[index]);
+          const to = addNode(parts[index + 1]);
+          if (from && to && from.id !== to.id) edges.push({ from: from.id, to: to.id });
+        }
+      }
+
+      if (!edges.length) return parseOutlineFlow(source);
+      return { nodes: [...nodes.values()], edges };
+    }
+
+    function parseOutlineFlow(source) {
+      const nodes = [];
+      const edges = [];
+      const stack = [];
+      for (const rawLine of String(source || "").split(/\r?\n/)) {
+        const match = rawLine.match(/^(\s*)(?:[-*+]|\d+[.)]|#{1,6})\s+(.+)$/);
+        if (!match) continue;
+        const level = Math.floor(match[1].length / 2);
+        const id = `n${nodes.length + 1}`;
+        nodes.push({ id, label: match[2].replace(/[#*`]/g, "").trim().slice(0, 60) });
+        if (stack[level - 1]) edges.push({ from: stack[level - 1], to: id });
+        stack[level] = id;
+        stack.length = level + 1;
+      }
+      return { nodes, edges };
+    }
+
+    function cleanFlowToken(token) {
+      let value = String(token || "").replace(/[;{}]/g, "").trim();
+      value = value.replace(/^(subgraph|end|classDef|class|style)\b.*$/i, "").trim();
+      const labeled = value.match(/^([A-Za-z0-9_.:-]+)\s*[\[\(\{]([^}\]\)]+)[\]\)\}]/);
+      if (labeled) return { id: labeled[1], label: labeled[2].replace(/^["']|["']$/g, "") };
+      value = value.replace(/^["']|["']$/g, "").trim();
+      return { id: value.replace(/\s+/g, "_").slice(0, 64), label: value.slice(0, 80) };
+    }
+
+    function renderFlowSvg(source, large) {
+      const { nodes, edges } = parseFlow(source);
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.classList.add("flow-svg");
+      const nodeMap = new Map(nodes.map((node) => [node.id, node]));
+      if (!nodes.length) {
+        svg.setAttribute("viewBox", "0 0 620 220");
+        addSvgText(svg, 310, 110, "未识别到可视化关系", "middle", "14px");
+        return svg;
+      }
+
+      const incoming = new Map(nodes.map((node) => [node.id, 0]));
+      const outgoing = new Map(nodes.map((node) => [node.id, []]));
+      for (const edge of edges) {
+        incoming.set(edge.to, (incoming.get(edge.to) || 0) + 1);
+        if (!outgoing.has(edge.from)) outgoing.set(edge.from, []);
+        outgoing.get(edge.from).push(edge.to);
+      }
+
+      const levels = new Map();
+      const roots = nodes.filter((node) => !incoming.get(node.id));
+      const queue = (roots.length ? roots : [nodes[0]]).map((node) => ({ id: node.id, level: 0 }));
+      while (queue.length) {
+        const current = queue.shift();
+        if (levels.has(current.id) && levels.get(current.id) <= current.level) continue;
+        levels.set(current.id, current.level);
+        for (const next of outgoing.get(current.id) || []) queue.push({ id: next, level: current.level + 1 });
+      }
+      nodes.forEach((node) => {
+        if (!levels.has(node.id)) levels.set(node.id, 0);
+      });
+
+      const grouped = new Map();
+      nodes.forEach((node) => {
+        const level = levels.get(node.id);
+        if (!grouped.has(level)) grouped.set(level, []);
+        grouped.get(level).push(node);
+      });
+      const levelKeys = [...grouped.keys()].sort((a, b) => a - b);
+      const colGap = large ? 250 : 210;
+      const rowGap = large ? 100 : 82;
+      const boxWidth = large ? 178 : 150;
+      const boxHeight = large ? 52 : 44;
+      const width = Math.max(620, levelKeys.length * colGap + 110);
+      const height = Math.max(220, Math.max(...[...grouped.values()].map((group) => group.length)) * rowGap + 90);
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+      const markerId = `arrow-${Math.random().toString(36).slice(2)}`;
+      marker.setAttribute("id", markerId);
+      marker.setAttribute("viewBox", "0 0 10 10");
+      marker.setAttribute("refX", "9");
+      marker.setAttribute("refY", "5");
+      marker.setAttribute("markerWidth", "7");
+      marker.setAttribute("markerHeight", "7");
+      marker.setAttribute("orient", "auto-start-reverse");
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+      path.setAttribute("fill", "#6f675d");
+      marker.appendChild(path);
+      defs.appendChild(marker);
+      svg.appendChild(defs);
+
+      levelKeys.forEach((level, levelIndex) => {
+        const group = grouped.get(level);
+        const x = 48 + levelIndex * colGap;
+        const startY = (height - ((group.length - 1) * rowGap + boxHeight)) / 2;
+        group.forEach((node, index) => {
+          node.x = x;
+          node.y = startY + index * rowGap;
+        });
+      });
+
+      for (const edge of edges) {
+        const from = nodeMap.get(edge.from);
+        const to = nodeMap.get(edge.to);
+        if (!from || !to) continue;
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", from.x + boxWidth);
+        line.setAttribute("y1", from.y + boxHeight / 2);
+        line.setAttribute("x2", to.x);
+        line.setAttribute("y2", to.y + boxHeight / 2);
+        line.setAttribute("stroke", "#6f675d");
+        line.setAttribute("stroke-width", "1.4");
+        line.setAttribute("marker-end", `url(#${markerId})`);
+        svg.appendChild(line);
+      }
+
+      for (const node of nodes) {
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", node.x);
+        rect.setAttribute("y", node.y);
+        rect.setAttribute("width", boxWidth);
+        rect.setAttribute("height", boxHeight);
+        rect.setAttribute("rx", "8");
+        rect.setAttribute("fill", "#fffefa");
+        rect.setAttribute("stroke", "#d8d0c3");
+        rect.setAttribute("stroke-width", "1.2");
+        group.appendChild(rect);
+        addSvgText(group, node.x + boxWidth / 2, node.y + boxHeight / 2 + 4, truncate(node.label || node.id, large ? 26 : 18), "middle", large ? "13px" : "12px");
+        svg.appendChild(group);
+      }
+
+      return svg;
+    }
+
+    function addSvgText(parent, x, y, text, anchor, size) {
+      const node = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      node.setAttribute("x", x);
+      node.setAttribute("y", y);
+      node.setAttribute("text-anchor", anchor);
+      node.setAttribute("fill", "#24221e");
+      node.setAttribute("font-size", size);
+      node.setAttribute("font-family", "var(--font)");
+      node.textContent = text;
+      parent.appendChild(node);
+      return node;
+    }
+
+    function truncate(value, limit) {
+      const text = String(value || "");
+      return text.length > limit ? `${text.slice(0, limit - 1)}...` : text;
+    }
+
+    async function copyText(text, button = null) {
+      try {
+        await navigator.clipboard.writeText(text || "");
+        if (button) {
+          const original = button.textContent;
+          button.textContent = "已复制";
+          setTimeout(() => { button.textContent = original; }, 1200);
+        }
+      } catch (error) {
+        openCodeViewer(text || error.message, "text");
+      }
+    }
+
     function sortByRecent(items) {
       return [...items].sort((a, b) => itemDate(b).localeCompare(itemDate(a)));
     }
@@ -740,6 +1425,7 @@
     }
 
     async function init() {
+      setupLayout();
       const [meta, graph, search, projects, topics, recent] = await Promise.all([
         loadJson("data/meta.json"),
         loadJson("data/graph-data.json"),
@@ -997,6 +1683,7 @@
         if (state.selectedId !== item.id) return;
         const body = els.detail.querySelector(".detail-body");
         body.innerHTML = renderMarkdown(content || item.summary || "");
+        enhanceDetailBody(body, item);
       } catch (error) {
         if (state.selectedId !== item.id) return;
         const body = els.detail.querySelector(".detail-body");
@@ -1140,21 +1827,27 @@
 
     els.fitGraph.addEventListener("click", () => renderGraph());
 
+    els.viewerClose.addEventListener("click", closeViewer);
+
+    els.viewerModal.addEventListener("click", (event) => {
+      if (event.target === els.viewerModal) closeViewer();
+    });
+
+    els.viewerCopy.addEventListener("click", () => copyText(state.viewerText, els.viewerCopy));
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !els.viewerModal.hidden) closeViewer();
+    });
+
     window.addEventListener("resize", () => {
       clearTimeout(window.__wikiResize);
       window.__wikiResize = setTimeout(renderGraph, 160);
     });
 
     init().catch((error) => {
-      els.buildMeta.textContent = "未加载本地数据";
-      els.resultList.innerHTML = `
-        <div class="empty">
-          这个公开仓库只包含功能架构，不包含知识库数据。<br>
-          在本机运行 <code>python tools/build-wiki-product.py --wiki-dir D:\\path\\to\\private\\wiki</code> 后再刷新页面。<br>
-          ${escapeHtml(error.message)}
-        </div>
-      `;
-      els.detail.innerHTML = '<div class="empty">生成的 public/data/ 会留在本机，并被 Git 忽略。</div>';
+      els.buildMeta.textContent = "数据加载失败";
+      els.resultList.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+      els.detail.innerHTML = '<div class="empty">请先运行数据构建，并通过本地服务打开 public/index.html。</div>';
     });
   </script>
 </body>
